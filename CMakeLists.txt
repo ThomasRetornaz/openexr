@@ -59,20 +59,20 @@ endmacro()
 #set(CTEST_DROP_LOCATION "/submit.php?project=MyProject")
 #set(CTEST_DROP_SITE_CDASH TRUE)
 
+if(BUILD_OPENXR_TESTING)
 include(CTest)
-if(BUILD_TESTING)
   enable_testing()
 endif()
 
 #######################################
-
+option(SKIP_INSTALL_ALL "Skip install" ON)
 # Include these two modules without enable/disable options
 add_subdirectory(IlmBase)
 add_subdirectory(OpenEXR)
 
 # should this just be always on and we conditionally compile what
 # is found and warn otherwise? or error out?
-option(PYILMBASE_ENABLE "Enables configuration of the PyIlmBase module" ON)
+option(PYILMBASE_ENABLE "Enables configuration of the PyIlmBase module" OFF)
 if(PYILMBASE_ENABLE)
   if (${CMAKE_VERSION} VERSION_LESS "3.12.0")
     message(WARNING ": CMake version ${CMAKE_VERSION} detected, PyIlmBase uses newer features of cmake (>= 3.12), disabling")
@@ -81,11 +81,14 @@ if(PYILMBASE_ENABLE)
   endif()
 endif()
 
-option(OPENEXR_VIEWERS_ENABLE "Enables configuration of the viewers module" ON)
+option(OPENEXR_VIEWERS_ENABLE "Enables configuration of the viewers module" OFF)
 if(OPENEXR_VIEWERS_ENABLE)
   add_subdirectory(OpenEXR_Viewers)
 endif()
 
-# Including this module will add a `clang-format` target to the build if
-# the clang-format executable can be found.
-include(cmake/clang-format.cmake)
+option(OPENEXR_CLANG_FORMAT_ENABLE "Enables clang format" OFF)
+if(OPENEXR_CLANG_FORMAT_ENABLE)
+  # Including this module will add a `clang-format` target to the build if
+  # the clang-format executable can be found.
+  include(cmake/clang-format.cmake)
+endif()  

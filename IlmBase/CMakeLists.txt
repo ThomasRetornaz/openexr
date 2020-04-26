@@ -50,8 +50,9 @@ add_subdirectory( IlmThread )
 # Can't seem to do EXCLUDE_FROM_ALL on the test executables
 # since you can't then create a dependency on the internal
 # "test" target such that it is auto built
-include(CTest)
-if(BUILD_TESTING)
+if(BUILD_OPENXR_TESTING)
+  include(CTest)
+
   enable_testing()
 
   add_subdirectory( HalfTest )

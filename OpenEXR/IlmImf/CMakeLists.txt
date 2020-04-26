@@ -190,5 +190,6 @@ openexr_define_library(IlmImf
     IlmBase::Half
     IlmBase::Imath
     IlmBase::IlmThread
-    ZLIB::ZLIB
+    #ZLIB::ZLIB
+    ${ZLIB_LIBRARY}
   )

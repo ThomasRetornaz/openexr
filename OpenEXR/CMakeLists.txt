@@ -49,7 +49,7 @@ include(config/LibraryDefine.cmake)
 add_subdirectory( IlmImf )
 add_subdirectory( IlmImfUtil )
 
-option(INSTALL_OPENEXR_EXAMPLES "Install OpenEXR examples" ON)
+option(INSTALL_OPENEXR_EXAMPLES "Install OpenEXR examples" OFF)
 if(INSTALL_OPENEXR_EXAMPLES)
   add_subdirectory( IlmImfExamples )
 endif()
@@ -60,8 +60,8 @@ endif()
 # Can't seem to do EXCLUDE_FROM_ALL on the test executables
 # since you can't then create a dependency on the internal
 # "test" target such that it is auto built
-include(CTest)
-if(BUILD_TESTING)
+if(BUILD_OPENXR_TESTING)
+  include(CTest)
   enable_testing()
   add_subdirectory( IlmImfTest )
   add_subdirectory( IlmImfUtilTest )
@@ -82,7 +82,7 @@ if(OPENEXR_BUILD_UTILS)
   add_subdirectory( exrmultipart )
 endif()
 
-option(INSTALL_OPENEXR_DOCS "Install OpenEXR documentation" ON)
+option(INSTALL_OPENEXR_DOCS "Install OpenEXR documentation" OFF)
 if(INSTALL_OPENEXR_DOCS)
   add_subdirectory(doc)
 endif()

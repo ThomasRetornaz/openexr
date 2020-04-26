@@ -31,7 +31,7 @@ endif()
 ## Build related options
 
 # Whether to build & install the various command line utility programs
-option(OPENEXR_BUILD_UTILS "Enables building of utility programs" ON)
+option(OPENEXR_BUILD_UTILS "Enables building of utility programs" OFF)
 
 # This is a variable here for use in controlling where include files are 
 # installed. Care must be taken when changing this, as many things
@@ -134,6 +134,6 @@ if(NOT TARGET Threads::Threads)
 endif()
 
 find_package(ZLIB REQUIRED)
-if(NOT TARGET ZLIB::ZLIB)
-  message(FATAL_ERROR "Unable to find zlib library target which is required for OpenEXR")
+if(NOT TARGET ${ZLIB_LIBRARY})
+   message(FATAL_ERROR "Unable to find zlib library target which is required for OpenEXR")
 endif()

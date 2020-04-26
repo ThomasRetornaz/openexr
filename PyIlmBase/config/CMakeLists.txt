@@ -11,6 +11,7 @@ target_include_directories(PyIlmBaseConfig INTERFACE
 install(TARGETS PyIlmBaseConfig EXPORT ${PROJECT_NAME})
 add_library(PyIlmBase::Config ALIAS PyIlmBaseConfig)
 
+if(NOT SKIP_INSTALL_ALL)
 # The main export of the configuration - This is the
 # moral equivalent of a pkg-config file for cmake
 # and replaces the Find*.cmake of the "old" cmake
@@ -29,3 +30,4 @@ install(EXPORT ${PROJECT_NAME}
   NAMESPACE ${PROJECT_NAME}::
   EXPORT_LINK_INTERFACE_LIBRARIES
 )
+endif()
