@@ -1448,6 +1448,8 @@ copyFromFrameBuffer (char *& writePtr,
                      Compressor::Format format,
 		     PixelType type)
 {
+    char * localWritePtr = writePtr;
+    const char * localReadPtr = readPtr;
     //
     // Copy a horizontal row of pixels from a frame
     // buffer to an output file's line or tile buffer.
@@ -1463,29 +1465,29 @@ copyFromFrameBuffer (char *& writePtr,
         {
           case OPENEXR_IMF_INTERNAL_NAMESPACE::UINT:
 
-            while (readPtr <= endPtr)
+            while (localReadPtr <= endPtr)
             {
-                Xdr::write <CharPtrIO> (writePtr,
-                                        *(const unsigned int *) readPtr);
-                readPtr += xStride;
+                Xdr::write <CharPtrIO> (localWritePtr,
+                                        *(const unsigned int *) localReadPtr);
+                localReadPtr += xStride;
             }
             break;
 
           case OPENEXR_IMF_INTERNAL_NAMESPACE::HALF:
 
-            while (readPtr <= endPtr)
+            while (localReadPtr <= endPtr)
             {
-                Xdr::write <CharPtrIO> (writePtr, *(const half *) readPtr);
-                readPtr += xStride;
+                Xdr::write <CharPtrIO> (localWritePtr, *(const half *) localReadPtr);
+                localReadPtr += xStride;
             }
             break;
 
           case OPENEXR_IMF_INTERNAL_NAMESPACE::FLOAT:
 
-            while (readPtr <= endPtr)
+            while (localReadPtr <= endPtr)
             {
-                Xdr::write <CharPtrIO> (writePtr, *(const float *) readPtr);
-                readPtr += xStride;
+                Xdr::write <CharPtrIO> (localWritePtr, *(const float *) localReadPtr);
+                localReadPtr += xStride;
             }
             break;
 
@@ -1504,33 +1506,33 @@ copyFromFrameBuffer (char *& writePtr,
         {
           case OPENEXR_IMF_INTERNAL_NAMESPACE::UINT:
 
-            while (readPtr <= endPtr)
+            while (localReadPtr <= endPtr)
             {
                 for (size_t i = 0; i < sizeof (unsigned int); ++i)
-                    *writePtr++ = readPtr[i];
+                    *localWritePtr++ = localReadPtr[i];
 
-                readPtr += xStride;
+                localReadPtr += xStride;
             }
             break;
 
           case OPENEXR_IMF_INTERNAL_NAMESPACE::HALF:
 
-            while (readPtr <= endPtr)
+            while (localReadPtr <= endPtr)
             {
-                *(half *) writePtr = *(const half *) readPtr;
-                writePtr += sizeof (half);
-                readPtr += xStride;
+                *(half *) localWritePtr = *(const half *) localReadPtr;
+                localWritePtr += sizeof (half);
+                localReadPtr += xStride;
             }
             break;
 
           case OPENEXR_IMF_INTERNAL_NAMESPACE::FLOAT:
 
-            while (readPtr <= endPtr)
+            while (localReadPtr <= endPtr)
             {
                 for (size_t i = 0; i < sizeof (float); ++i)
-                    *writePtr++ = readPtr[i];
+                    *localWritePtr++ = localReadPtr[i];
 
-                readPtr += xStride;
+                localReadPtr += xStride;
             }
             break;
             
@@ -1539,6 +1541,9 @@ copyFromFrameBuffer (char *& writePtr,
             throw IEX_NAMESPACE::ArgExc ("Unknown pixel data type.");
         }
     }
+
+    writePtr = localWritePtr;
+    readPtr = localReadPtr;
 }
 
 void
@@ -1881,10 +1886,6 @@ getScanlineChunkOffsetTableSize(const Header& header)
 {
     const Box2i &dataWindow = header.dataWindow();
 
-    vector<size_t> bytesPerLine;
-    size_t maxBytesPerLine = bytesPerLineTable (header,
-                                                bytesPerLine);
-
     int linesInBuffer = numLinesInBuffer ( header.compression() );
 
     int lineOffsetSize = (dataWindow.max.y - dataWindow.min.y +
@@ -1900,18 +1901,30 @@ int
 getTiledChunkOffsetTableSize(const Header& header);
 
 int
-getChunkOffsetTableSize(const Header& header,bool ignore_attribute)
+getChunkOffsetTableSize(const Header& header,bool)
 {
-    if(!ignore_attribute && header.hasChunkCount())
-    {
-        return header.chunkCount();
-    }
-    
+    //
+    // if there is a type in the header which indicates the part is not a currently supported type,
+    // use the chunkCount attribute
+    //
+
+
     if(header.hasType()  && !isSupportedType(header.type()))
     {
-        throw IEX_NAMESPACE::ArgExc ("unsupported header type to "
-        "get chunk offset table size");
+        if(header.hasChunkCount())
+        {
+           return header.chunkCount();
+        }
+        else
+        {
+           throw IEX_NAMESPACE::ArgExc ("unsupported header type to "
+           "get chunk offset table size");
+        }
     }
+
+    //
+    // part is a known type - ignore the header attribute and compute the chunk size from the header
+    //
     if (isTiled(header.type()) == false)
         return getScanlineChunkOffsetTableSize(header);
     else

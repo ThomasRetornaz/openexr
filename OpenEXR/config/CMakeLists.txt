@@ -47,6 +47,9 @@ set(OPENEXR_IMF_HAVE_COMPLETE_IOMANIP TRUE)
 
 if(APPLE)
   set(OPENEXR_IMF_HAVE_DARWIN TRUE)
+  if (${CMAKE_OSX_ARCHITECTURES} MATCHES arm64)
+    set(OPENEXR_IMF_HAVE_GCC_INLINE_ASM_AVX FALSE)
+  endif()
 endif()
 
 configure_file(OpenEXRConfig.h.in_cmake ${CMAKE_CURRENT_BINARY_DIR}/OpenEXRConfig.h)
@@ -99,16 +102,21 @@ if(NOT SKIP_INSTALL_ALL)
 # moral equivalent of a pkg-config file for cmake
 # and replaces the Find*.cmake of the "old" cmake
 include(CMakePackageConfigHelpers)
+configure_package_config_file(OpenEXRConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
 write_basic_package_version_file("${PROJECT_NAME}ConfigVersion.cmake"
   VERSION ${OPENEXR_VERSION}
   COMPATIBILITY SameMajorVersion
 )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 )
 install(EXPORT ${PROJECT_NAME}
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-  FILE ${PROJECT_NAME}Config.cmake
+  FILE ${PROJECT_NAME}Targets.cmake
   NAMESPACE ${PROJECT_NAME}::
   EXPORT_LINK_INTERFACE_LIBRARIES
 )

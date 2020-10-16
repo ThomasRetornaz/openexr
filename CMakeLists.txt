@@ -68,7 +68,22 @@ endif()
 option(SKIP_INSTALL_ALL "Skip install" ON)
 # Include these two modules without enable/disable options
 add_subdirectory(IlmBase)
+
+# Tell CMake where to find the IlmBaseConfig.cmake file. Makes it posible to call 
+# find_package(IlmBase) in downstream projects
+set(IlmBase_DIR "${CMAKE_CURRENT_BINARY_DIR}/IlmBase/config" CACHE PATH "" FORCE)
+# Add an empty IlmBaseTargets.cmake file for the config to use. 
+# Can be empty since we already defined the targets in add_subdirectory
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/IlmBase/config/IlmBaseTargets.cmake" "# Dummy file")
+
 add_subdirectory(OpenEXR)
+
+# Tell CMake where to find the OpenEXRConfig.cmake file. Makes it posible to call 
+# find_package(OpenEXR) in downstream projects
+set(OpenEXR_DIR "${CMAKE_CURRENT_BINARY_DIR}/OpenEXR/config" CACHE PATH "" FORCE)
+# Add an empty OpenEXRTargets.cmake file for the config to use. 
+# Can be empty since we already defined the targets in add_subdirectory
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OpenEXR/config/OpenEXRTargets.cmake" "# Dummy file")
 
 # should this just be always on and we conditionally compile what
 # is found and warn otherwise? or error out?

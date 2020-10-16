@@ -582,7 +582,7 @@ TileBufferTask::execute ()
         // Uncompress the data, if necessary
         //
 
-        if (_tileBuffer->compressor && _tileBuffer->dataSize < Int64(sizeOfTile))
+        if (_tileBuffer->compressor && _tileBuffer->dataSize < static_cast<Int64>(sizeOfTile))
         {
             _tileBuffer->format = _tileBuffer->compressor->format();
 
@@ -600,6 +600,15 @@ TileBufferTask::execute ()
             _tileBuffer->format = Compressor::XDR;
             _tileBuffer->uncompressedData = _tileBuffer->buffer;
         }
+
+	//
+	// sanity check data size: the uncompressed data should be exactly 
+	// 'sizeOfTile' (if it's less, the file is corrupt and there'll be a buffer overrun)
+	//
+        if (_tileBuffer->dataSize != static_cast<Int64>(sizeOfTile))
+	{
+		THROW (IEX_NAMESPACE::InputExc, "size mismatch when reading deep tile: expected " << sizeOfTile << "bytes of uncompressed data but got " << _tileBuffer->dataSize);
+	}
 
         //
         // Convert the tile of pixel data back from the machine-independent
@@ -1791,7 +1800,7 @@ DeepTiledInputFile::readPixelSampleCounts (int dx1, int dx2,
                 // @TODO refactor the compressor code to ensure full 64-bit support.
                 //
 
-                Int64 compressorMaxDataSize = Int64(std::numeric_limits<int>::max());
+                Int64 compressorMaxDataSize = static_cast<Int64>(std::numeric_limits<int>::max());
                 if (dataSize         > compressorMaxDataSize ||
                     unpackedDataSize > compressorMaxDataSize ||
                     tableSize        > compressorMaxDataSize)
